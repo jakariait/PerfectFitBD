@@ -13,7 +13,6 @@ const MobileMenu = () => {
   const { subCategories } = useSubCategoryStore();
   const { childCategories } = useChildCategoryStore();
 
-
   const toggleCategory = (categoryId) => {
     setExpandedCategory((prev) => (prev === categoryId ? null : categoryId));
     setExpandedSubCategory(null);

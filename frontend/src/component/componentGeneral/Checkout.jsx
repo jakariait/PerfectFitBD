@@ -215,6 +215,7 @@ const Checkout = () => {
     try {
       const res = await axios.post(`${apiUrl}/orders`, orderPayload);
 
+
       if (res.data.success) {
         setOrderPlaced(true);
 
