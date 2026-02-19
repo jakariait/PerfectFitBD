@@ -25,9 +25,8 @@ import axios from "axios";
 import useAuthAdminStore from "../../store/AuthAdminStore";
 import ImageComponent from "../componentGeneral/ImageComponent.jsx";
 
-import { saveAs } from "file-saver";
+import { CSVLink } from "react-csv";
 import RequirePermission from "./RequirePermission.jsx";
-import ExcelJS from "exceljs";
 
 
 const CustomerList = () => {
@@ -57,7 +56,7 @@ const CustomerList = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setCustomers(res.data.users);
+      setCustomers(res.data.users || []);
     } catch (err) {
       setSnackbar({
         open: true,
@@ -75,7 +74,7 @@ const CustomerList = () => {
 
   useEffect(() => {
     // Filter customers based on search input
-    const filtered = customers.filter(
+    const filtered = (customers || []).filter(
       (cus) =>
         cus.fullName?.toLowerCase().includes(search.toLowerCase()) ||
         cus.email?.toLowerCase().includes(search.toLowerCase()),
@@ -125,43 +124,6 @@ const CustomerList = () => {
     }
   };
 
-  const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Customers");
-
-    worksheet.columns = [
-      { header: "SL No", key: "sl", width: 8 },
-      { header: "Name", key: "name", width: 20 },
-      { header: "Email", key: "email", width: 25 },
-      { header: "Phone", key: "phone", width: 15 },
-      { header: "Joined Date", key: "joined", width: 15 },
-      { header: "Deletion Requested", key: "deletion", width: 18 },
-      { header: "Requested At", key: "requestedAt", width: 25 },
-    ];
-
-    filteredCustomers.forEach((cus, index) => {
-      worksheet.addRow({
-        sl: index + 1,
-        name: cus.fullName || "N/A",
-        email: cus.email || "N/A",
-        phone: cus.phone || "N/A",
-        joined: cus.createdAt
-          ? new Date(cus.createdAt).toLocaleDateString()
-          : "N/A",
-        deletion: cus.accountDeletion?.requested ? "Yes" : "No",
-        requestedAt: cus.accountDeletion?.requestedAt
-          ? new Date(cus.accountDeletion.requestedAt).toLocaleString()
-          : "N/A",
-      });
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, "customers.xlsx");
-  };
-
   const paginatedCustomers = filteredCustomers.slice(
     (page - 1) * limit,
     page * limit,
@@ -175,14 +137,34 @@ const CustomerList = () => {
         <h1 className="border-l-4 primaryBorderColor primaryTextColor mb-6 pl-2 text-lg font-semibold ">
           Customer List
         </h1>
-        <button
-          className={
-            "primaryBgColor accentTextColor cursor-pointer px-4 py-2 rounded-lg"
-          }
-          onClick={handleExportExcel}
+        <CSVLink
+          data={filteredCustomers.map((cus, index) => ({
+            sl: index + 1,
+            name: cus.fullName || "N/A",
+            email: cus.email || "N/A",
+            phone: cus.phone || "N/A",
+            joined: cus.createdAt
+              ? new Date(cus.createdAt).toLocaleDateString()
+              : "N/A",
+            deletion: cus.accountDeletion?.requested ? "Yes" : "No",
+            requestedAt: cus.accountDeletion?.requestedAt
+              ? new Date(cus.accountDeletion.requestedAt).toLocaleString()
+              : "N/A",
+          }))}
+          headers={[
+            { label: "SL No", key: "sl" },
+            { label: "Name", key: "name" },
+            { label: "Email", key: "email" },
+            { label: "Phone", key: "phone" },
+            { label: "Joined Date", key: "joined" },
+            { label: "Deletion Requested", key: "deletion" },
+            { label: "Requested At", key: "requestedAt" },
+          ]}
+          filename={"customers.csv"}
+          className="primaryBgColor accentTextColor cursor-pointer px-4 py-2 rounded-lg"
         >
-          Download As Excel
-        </button>
+          Download As CSV
+        </CSVLink>
       </div>
 
       <div className="flex justify-between items-center py-4 flex-wrap gap-4">
