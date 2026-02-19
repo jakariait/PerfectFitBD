@@ -312,7 +312,6 @@ const getProductDetails = async (req, res) => {
   }
 };
 
-
 const homePageProducts = async (req, res) => {
   try {
     const data = await productService.getHomePageProducts();
@@ -328,7 +327,6 @@ const homePageProducts = async (req, res) => {
     });
   }
 };
-
 
 /**
  * Generate Meta (Facebook) Product Catalog Feed
@@ -382,11 +380,6 @@ const getMetaCatalog = async (req, res) => {
   }
 };
 
-
-
-
-
-
 module.exports = {
   createProduct,
   getProductBySlug,
@@ -399,5 +392,5 @@ module.exports = {
   getAllProductsAdmin,
   getProductDetails,
   homePageProducts,
-  getMetaCatalog
+  getMetaCatalog,
 };
