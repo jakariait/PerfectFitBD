@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "../.env") });
 
 // Connect to MongoDB
 await mongoose.connect(process.env.MONGO_URI, {
@@ -59,7 +59,7 @@ const collectUsedImages = async () => {
   users.forEach((user) => addImage(user.userImage));
 
   const blogs = await BlogModel.find({}, "thumbnailImage");
-  blogs.forEach((user) => addImage(user.userImage));
+  blogs.forEach((blog) => addImage(blog.thumbnailImage));
 };
 
 await collectUsedImages();
